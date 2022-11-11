@@ -1,0 +1,7 @@
+.cache
+.docker
+.kube
+.minikube
+.vagrant
+docker
+logs.txt

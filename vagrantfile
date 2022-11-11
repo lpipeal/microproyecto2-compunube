@@ -1,0 +1,32 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+    if Vagrant.has_plugin? "vagrant-vbguest"
+      config.vbguest.no_install  = true
+      config.vbguest.auto_update = false
+      config.vbguest.no_remote   = true
+    end
+  
+    config.vm.define :clusterKubernetes do |servidorUbuntu|
+      servidorUbuntu.vm.box = "bento/ubuntu-20.04"
+      servidorUbuntu.vm.hostname = "servidor"
+      servidorUbuntu.vm.network :private_network, ip: "192.168.100.3"
+      servidorUbuntu.vm.provision "shell", path: "script_puppet.sh"
+      servidorUbuntu.vm.synced_folder './', '/home/vagrant', type: "virtualbox"
+      servidorUbuntu.ssh.insert_key = false
+      servidorUbuntu.ssh.username = "vagrant"
+      servidorUbuntu.ssh.password = "vagrant"
+      servidorUbuntu.vm.provider "virtualbox" do |v|
+        v.gui = true
+        v.cpus = 2
+        v.memory = 2048
+      end
+      servidorUbuntu.vm.provision :puppet do |puppet|
+        puppet.manifests_path = "puppet/manifests"
+        puppet.manifest_file = "config_server.pp"
+        puppet.module_path = "puppet/modules"
+      end
+    end
+  end
